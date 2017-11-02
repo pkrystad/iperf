@@ -113,7 +113,7 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen,
 
 /* make connection to server */
 int
-netdial(int domain, int proto, char *local, int local_port, char *server, int port, int timeout)
+netdial(int domain, int proto, int proto_num, char *local, int local_port, char *server, int port, int timeout)
 {
     struct addrinfo hints, *local_res, *server_res;
     int s;
@@ -132,7 +132,8 @@ netdial(int domain, int proto, char *local, int local_port, char *server, int po
     if (getaddrinfo(server, NULL, &hints, &server_res) != 0)
         return -1;
 
-    s = socket(server_res->ai_family, proto, 0);
+    printf("\nnetdial: proto_num: %d\n", proto_num);
+    s = socket(server_res->ai_family, proto, proto_num);
     if (s < 0) {
 	if (local)
 	    freeaddrinfo(local_res);
@@ -171,7 +172,7 @@ netdial(int domain, int proto, char *local, int local_port, char *server, int po
 /***************************************************************/
 
 int
-netannounce(int domain, int proto, char *local, int port)
+netannounce(int domain, int proto, int proto_num, char *local, int port)
 {
     struct addrinfo hints, *res;
     char portstr[6];
@@ -202,19 +203,23 @@ netannounce(int domain, int proto, char *local, int port)
     if (getaddrinfo(local, portstr, &hints, &res) != 0)
         return -1; 
 
-    s = socket(res->ai_family, proto, 0);
+    printf("\nnetannounce: proto_num: %d\n", proto_num);
+    printf("\nnetannounce: ai_family: %d\n", res->ai_family);
+    s = socket(res->ai_family, proto, proto_num);
     if (s < 0) {
 	freeaddrinfo(res);
         return -1;
     }
 
     opt = 1;
+    printf("\nnetannounce: setsockopt\n");
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, 
 		   (char *) &opt, sizeof(opt)) < 0) {
 	close(s);
 	freeaddrinfo(res);
 	return -1;
     }
+
     /*
      * If we got an IPv6 socket, figure out if it should accept IPv4
      * connections as well.  We do that if and only if no address
@@ -238,6 +243,7 @@ netannounce(int domain, int proto, char *local, int port)
     }
 #endif /* IPV6_V6ONLY */
 
+    printf("\nnetannounce: bind\n");
     if (bind(s, (struct sockaddr *) res->ai_addr, res->ai_addrlen) < 0) {
         close(s);
 	freeaddrinfo(res);
@@ -247,6 +253,7 @@ netannounce(int domain, int proto, char *local, int port)
     freeaddrinfo(res);
     
     if (proto == SOCK_STREAM) {
+    printf("\nnetannounce: listen\n");
         if (listen(s, 5) < 0) {
 	    close(s);
             return -1;
