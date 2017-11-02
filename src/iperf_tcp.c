@@ -183,7 +183,8 @@ iperf_tcp_listen(struct iperf_test *test)
             return -1;
         }
 
-        if ((s = socket(res->ai_family, SOCK_STREAM, 0)) < 0) {
+        printf("\niperf_tcp_listen: proto_num: %d\n", test->proto_num);
+        if ((s = socket(res->ai_family, SOCK_STREAM, test->proto_num)) < 0) {
 	    freeaddrinfo(res);
             i_errno = IESTREAMLISTEN;
             return -1;
@@ -383,7 +384,8 @@ iperf_tcp_connect(struct iperf_test *test)
         return -1;
     }
 
-    if ((s = socket(server_res->ai_family, SOCK_STREAM, 0)) < 0) {
+    printf("\niperf_tcp_connect: proto_num: %d\n", test->proto_num);
+    if ((s = socket(server_res->ai_family, SOCK_STREAM, test->proto_num)) < 0) {
 	if (test->bind_address)
 	    freeaddrinfo(local_res);
 	freeaddrinfo(server_res);

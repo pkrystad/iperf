@@ -643,6 +643,7 @@ iperf_parse_arguments(struct iperf_test *test, int argc, char **argv)
         {"reverse", no_argument, NULL, 'R'},
         {"window", required_argument, NULL, 'w'},
         {"bind", required_argument, NULL, 'B'},
+        {"protonum", required_argument, NULL, OPT_PROTO_NUM},
         {"cport", required_argument, NULL, OPT_CLIENT_PORT},
         {"set-mss", required_argument, NULL, 'M'},
         {"no-delay", no_argument, NULL, 'N'},
@@ -858,6 +859,9 @@ iperf_parse_arguments(struct iperf_test *test, int argc, char **argv)
                 break;
             case 'B':
                 test->bind_address = strdup(optarg);
+                break;
+            case OPT_PROTO_NUM:
+                test->proto_num = atoi(optarg);
                 break;
             case OPT_CLIENT_PORT:
                 test->bind_port = atoi(optarg);
